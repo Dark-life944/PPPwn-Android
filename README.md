@@ -84,6 +84,10 @@ cat sudo > /data/data/com.termux/files/usr/bin/sudo
 ```sh
 chmod 700 /data/data/com.termux/files/usr/bin/sudo
 ```
+13.1
+```sh
+cd
+```
 14.
 ```sh
 cd storage/emulated/0
