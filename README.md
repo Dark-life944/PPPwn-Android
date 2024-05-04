@@ -105,12 +105,11 @@ Install the requirements:
 sudo pip install -r requirements.txt
 ```
 
-Compile the payloads:
+-Compile the payloads:
 
-```sh
-make -C stage1 FW=1100 clean && make -C stage1 FW=1100
-make -C stage2 FW=1100 clean && make -C stage2 FW=1100
-```
+we well use the file from mcrump special thank for him!
+
+-Download the `PPPwn.rar` from [here](https://github.com/mbcrump/PPPwn-Windows-Instructions/blob/main/compiled-binaries/PPPwn.rar) site and copy the `stage1` and `stage2` folder to where you installed the exploit overwritting any files.
 
 For other firmwares, e.g. FW 9.00, pass `FW=900`.
 
@@ -134,7 +133,10 @@ On your PS4:
 
 If the exploit fails or the PS4 crashes, you can skip the internet setup and simply click on `Test Internet Connection`. If the `pppwn.py` script is stuck waiting for a request/response, abort it and run it again on your computer, and then click on `Test Internet Connection` on your PS4.
 
-If the exploit works, you should see an output similar to below, and you should see `Cannot connect to network.` followed by `PPPwned` printed on your PS4.
+If the exploit works, you should see an output similar to below, and you should see `Cannot connect to network.` 
+followed by `PPPwned` printed on your PS4.
+
+### NOTE: THIS SOMETIMES WORK SOMETIMES NOT IT UNDER THE DEVELOPMENT SO ENJOY IT
 
 ### Example run
 
