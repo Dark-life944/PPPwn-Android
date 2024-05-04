@@ -24,6 +24,10 @@ The exploit only prints `PPPwned` on your PS4 as a proof-of-concept. In order to
 
 open termux and setup this command one by one:
 
+#NOTE: 
+- if this message show [defaul=N?] press always N
+- if this message show Y/N press Y
+- this note is for the user who not know programming.
 1.
 ```sh
 apt update && apt upgrade
