@@ -56,6 +56,10 @@ apt install vim
 ```sh
 apt install clang 
 ```
+7.1
+```sh
+pkg install nmap
+```
 8. before this command open termux app and allow storage
 ```sh
 termux-setup-storage
