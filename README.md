@@ -80,7 +80,7 @@ chmod 700 /data/data/com.termux/files/usr/bin/sudo
 ```sh
 cd storage/emulated/0
 ```
--note: if this message show ( ) tap this:
+-note: if this message show ( bash: cd: storage/emulated/0 : No such file or directory) tap this:
 ```sh
 cd storage/shared
 ```
