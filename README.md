@@ -12,18 +12,83 @@ Supported versions are:
 
 The exploit only prints `PPPwned` on your PS4 as a proof-of-concept. In order to launch Mira or similar homebrew enablers, the `stage2.bin` payload needs to be adapted.
 
-## Requirements
-- A computer with an Ethernet port
-  - USB adapter also works
-- Ethernet cable
-- Linux
-  - You can use VirtualBox to create a Linux VM with `Bridged Adapter` as network adapter to use the ethernet port in the VM.
-- Python3 and gcc installed
 
+## Requirements
+- !!rooted Phone!!
+- an adapter Ethernet port for phone
+- Ethernet cable
+- termux
+- free storage 3gb or hight
+  
 ## Usage
 
-On your computer, clone the repository:
+open termux and setup this command one by one:
 
+1.
+```sh
+apt update && apt upgrade
+```
+2.
+```sh
+pkg install root-repo
+```
+3.
+```sh
+pkg install x11-repo
+```
+4.
+```sh
+pkg install git
+```
+5.
+```sh
+pkg install  python-pip
+```
+6.
+```sh
+apt install vim 
+```
+7.
+```sh
+apt install clang 
+```
+8. before this command open termux app and allow storage
+```sh
+termux-setup-storage
+```
+9.
+```sh
+pkg install tsu
+```
+10.
+```sh
+git clone https://gitlab.com/st42/termux-sudo
+```
+11.
+```sh
+cd termux-sudo
+```
+12.
+```sh
+cat sudo > /data/data/com.termux/files/usr/bin/sudo
+```
+13.
+```sh
+chmod 700 /data/data/com.termux/files/usr/bin/sudo
+```
+14.
+```sh
+cd storage/emulated/0
+```
+-note: if this message show ( ) tap this:
+```sh
+cd storage/shared
+```
+15.
+```sh
+mkdir test && cd test
+```
+16.
 ```sh
 git clone --recursive https://github.com/TheOfficialFloW/PPPwn
 ```
@@ -52,7 +117,7 @@ For other firmwares, e.g. FW 9.00, pass `FW=900`.
 Run the exploit (see `ifconfig` for the correct interface):
 
 ```sh
-sudo python3 pppwn.py --interface=enp0s3 --fw=1100
+sudo python3 pppwn.py --interface=Ethernet --fw=1100
 ```
 
 For other firmwares, e.g. FW 9.00, pass `--fw=900`.
@@ -156,8 +221,4 @@ If the exploit works, you should see an output similar to below, and you should 
 [+] Done!
 ```
 
-## Notes for Mac Apple Silicon Users (arm64 / aarch64)
-The code will not compile on Apple Silicon and requires AMD64 architecture. 
-There is a workaround using docker which will build the bin files required.
-Clone this repository to your mac system, then from the repo folder run `./build-macarm.sh`.This will build the binaries for PS4 FW 1100 and place the necessary files into the correct folders. To build the binaries for a different version, i.e. 900, run the command as such: `./build-macarm.sh 900`. Once built, copy this folder structure into the Linux VM and execute as instructed above. 
-This has been tested using VMware Fusion 13.5.1, with the VM Guest as Ubuntu 24.04, and the host machine is MacOS 14.4.1
+## special thanks for the flow and mcrump and lighting mode.
