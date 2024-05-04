@@ -109,7 +109,7 @@ sudo pip install -r requirements.txt
 
 we well use the file from mcrump special thank for him!
 
--Download the `PPPwn.rar` from [here](https://github.com/mbcrump/PPPwn-Windows-Instructions/blob/main/compiled-binaries/PPPwn.rar) site and copy the `stage1` and `stage2` folder to where you installed the exploit overwritting any files.
+-Download the `PPPwn.rar` from [here](https://github.com/mbcrump/PPPwn-Windows-Instructions/blob/main/compiled-binaries/PPPwn.rar) site and copy the `stage1` and `stage2` folder to where you installed the exploit overwritting any files./ go on folder test/PPPwn .
 
 For other firmwares, e.g. FW 9.00, pass `FW=900`.
 
