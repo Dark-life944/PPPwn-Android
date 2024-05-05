@@ -127,8 +127,9 @@ For other firmwares, e.g. FW 9.00, pass `FW=900`.
 
 Run the exploit (see `ifconfig` for the correct interface):
 
-## Ethernet cable // Hotspot mobile:
-## Ethernet cable run this :
+## Adapter Ethernet cable // Hotspot mobile:
+
+## Adapter Ethernet cable run this :
 ```sh
 sudo python3 pppwn.py --interface=Ethernet --fw=1100
 ```
