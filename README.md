@@ -135,7 +135,7 @@ sudo python3 pppwn.py --interface=Ethernet --fw=1100
 ```
 ## Hotspot mobile run this:
 ```sh
-sudo python3 pppwn-hotspot.py --interface=wlan0 --fw=1100
+sudo python3 pppwn.py --interface=wlan0 --fw=1100
 ```
 For other firmwares, e.g. FW 9.00, pass `--fw=900`.
 
