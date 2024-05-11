@@ -21,13 +21,13 @@ git clone https://gitlab.com/st42/termux-sudo
 
 # Build and install termux-sudo within the cloned directory (safer approach)
 cd termux-sudo
-./build.sh
+./build.sh  && bash sudo
 
 # Return to the original directory
 cd ..
 
 # Create a test directory (modify path if needed)
-mkdir -p storage/shared/test && cd storage/shared/test
+mkdir -p storage/emulated/0/test && cd storage/emulated/0/test
 
 # Clone PPPwn with submodules
 git clone --recursive https://github.com/TheOfficialFloW/PPPwn
